@@ -60,6 +60,7 @@ export default defineComponent({
   'opsz' 24;
   font-size: 10em;
   margin: auto;
+  font-family: 'Material Symbols Outlined'!important;
 }
 @media(max-width:1660px){
   .dropzone{
