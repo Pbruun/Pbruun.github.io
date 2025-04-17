@@ -4,7 +4,7 @@
       <input class="armorClass" type="text" v-model="protectionAndAttackStore.armorClass"/>
       <div class="initiativeContainer">
         <input class="initiative" type="text" v-model="protectionAndAttackStore.initiative"/>
-        <button class="rollInitiative btn" @click="roll(protectionAndAttackStore.initiative)"></button>
+        <button class="rollInitiative btn" @click="roll(protectionAndAttackStore.initiative)" @click.right.prevent="roll(protectionAndAttackStore.initiative,true)"></button>
       </div>
       <input class="speed" type="text" v-model="protectionAndAttackStore.speed"/>
     </div>
@@ -17,8 +17,13 @@
     <div class="thirdRow">
       <div class="hitDiceContainer">
         <input class="totalHitDice" type="text" v-model="protectionAndAttackStore.totalHitDice"/>
-        <input class="hitDice" type="text" v-model="protectionAndAttackStore.hitDice"/>
-        <button class="rollHitDice btn"></button>
+        <label class="spentHitDiceLabel">
+          spent
+          <input class="spentHitDice" type="text" v-model="spentHitDice"/>
+        </label>
+
+        <input class="hitDice" type="text" v-model="protectionAndAttackStore.hitDice" title="d<dice type>"/>
+        <button class="rollHitDice btn" @click="rollHitDice" title="Rolls hit dice + constitution modifier"></button>
       </div>
       <div @click.right.prevent class="deathSaveContainer">
         <div class="success">
@@ -66,15 +71,19 @@
 </template>
 
 <script lang="ts">
+import { useAbilitiesStore } from '@/stores/abilitiesStore';
 import { useProtectionAndAttackStore } from '@/stores/protectionAndAttackStore';
 import { useRollStore } from '@/stores/rollStore';
-import { defineComponent } from 'vue';
+import { defineComponent,ref } from 'vue';
 
 export default defineComponent({
   name: 'ProtectionAndAttack',
   setup () {
     const protectionAndAttackStore = useProtectionAndAttackStore();
     const rollStore = useRollStore();
+    const spentHitDice = ref(0);
+    const abilitiesStore = useAbilitiesStore();
+
     const dsSuccess = (value:number)=>{
       const result = protectionAndAttackStore.deathSavesSuccess + value;
       if(result >=0 && result <=3){
@@ -88,14 +97,33 @@ export default defineComponent({
       }
     }
 
-    const roll = (value:string) => {
+    const roll = (value:string,advantageOrDisadvantage:boolean=false) => {
       const valueNumber = parseInt(value);
       if(!isNaN(valueNumber)){
-        rollStore.rollDice(20,valueNumber);
+        rollStore.rollDice(20,valueNumber,1,advantageOrDisadvantage);
       }
     }
+    const rollHitDice = () =>{
+      const totalHitDice = isNaN(parseInt(protectionAndAttackStore.totalHitDice)) ? 0 : parseInt(protectionAndAttackStore.totalHitDice);
+      if(spentHitDice.value < totalHitDice){
+        spentHitDice.value++;
+        const diceNumber = parseInt(protectionAndAttackStore.hitDice.split("d")[1]);
+        const diceType = diceNumber? diceNumber: parseInt(protectionAndAttackStore.hitDice);
+        const maxHP = isNaN(parseInt(protectionAndAttackStore.maxHP)) ? 0 : parseInt(protectionAndAttackStore.maxHP);
+        const currentHP = isNaN(parseInt(protectionAndAttackStore.currentHP)) ? 0 : parseInt(protectionAndAttackStore.currentHP);
+        if(diceType){
+          const hitDiceRolled = rollStore.simpleDiceRoll(diceType)+abilitiesStore.constitutionMod;
+          if(hitDiceRolled + currentHP >= maxHP){
+            protectionAndAttackStore.currentHP = `${maxHP}`;
+          }else{
+            protectionAndAttackStore.currentHP = `${currentHP + hitDiceRolled}`;
+          }
+
+        }
+    }
+  }
     return {
-      protectionAndAttackStore,roll,dsSuccess,dsFailure
+      protectionAndAttackStore,roll,dsSuccess,dsFailure,spentHitDice,rollHitDice
 
     }
   }
@@ -209,13 +237,19 @@ export default defineComponent({
 }
 
 .totalHitDice{
-  width: 4.9em;
+  width: 1.4em;
   margin-left: 1.8em;
   font-size:15px;
   height: 1em;
 
 }
-
+.spentHitDiceLabel{
+  font-size:9px;
+  color: rgb(80, 80, 80)
+}
+.spentHitDice{
+  width:1.4em
+}
 .hitDice {
   width: 4em;
   font-size: 25px;
