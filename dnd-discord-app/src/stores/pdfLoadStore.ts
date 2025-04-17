@@ -17,6 +17,10 @@ export const usePdfLoadStore = defineStore('pdfLoadStore', () => {
   const errorMessage = ref('');
   const discordUrl = ref('');
   const sendMessagesToDiscord = ref(true);
+  const instance = axios.create({
+    baseURL: 'https://discord.com/api/webhooks',
+    timeout: 3000
+  });
 
   const loadPdf = async (e:DragEvent)=>{
     if(e.dataTransfer){
@@ -152,8 +156,8 @@ export const usePdfLoadStore = defineStore('pdfLoadStore', () => {
     })
     }catch(e){
       try{
-        axios.get(`https:/discord.com/api/webhooks/${import.meta.env.VITE_DISCORD_WEBHOOK_ID}`).then((response)=>{
-          axios.post(response.data.url, {
+        instance.get(`/${import.meta.env.VITE_DISCORD_WEBHOOK_ID}`).then((response)=>{
+          instance.post(response.data.url, {
             username: abilitiesStore.characterName?abilitiesStore.characterName: "Character rolled",
             content: message
         })
@@ -165,7 +169,7 @@ export const usePdfLoadStore = defineStore('pdfLoadStore', () => {
     }
   }
   const setupDiscord = async () => {
-    const respone = await axios.get(`https:/discord.com/api/webhooks/${import.meta.env.VITE_DISCORD_WEBHOOK_ID}`)
+    const respone = await instance.get(`/${import.meta.env.VITE_DISCORD_WEBHOOK_ID}`)
     discordUrl.value = respone.data.url;
 
   }
