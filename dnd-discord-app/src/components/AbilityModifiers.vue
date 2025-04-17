@@ -1,32 +1,32 @@
 <template>
-<div class="abilityMods">
+<div class="abilityMods" @click.right.prevent>
       <div class="abilityMod">
-        <button class="rollStr abilityBtn" @click="roll(abilitiesStore.strengthMod)"></button>
+        <button class="rollStr abilityBtn" @click="roll(abilitiesStore.strengthMod)" @click.right.prevent=roll(abilitiesStore.strengthMod,true)></button>
         <input class="strength score" type="text" v-model="abilitiesStore.strength"/>
         <input class="strengthMod modifier" type="text" :value="abilitiesStore.strengthMod"/>
       </div>
       <div class="abilityMod">
-        <button class="rollDex abilityBtn" @click="roll(abilitiesStore.dexterityMod)"></button>
+        <button class="rollDex abilityBtn" @click="roll(abilitiesStore.dexterityMod)" @click.right.prevent=roll(abilitiesStore.dexterityMod,true)></button>
         <input class="dexterity score" type="text" v-model="abilitiesStore.dexterity"/>
         <input class="dexterityMod modifier" type="text" :value="abilitiesStore.dexterityMod"/>
       </div>
       <div class="abilityMod">
-        <button class="rollCon abilityBtn" @click="roll(abilitiesStore.constitutionMod)"></button>
+        <button class="rollCon abilityBtn" @click="roll(abilitiesStore.constitutionMod)" @click.right.prevent=roll(abilitiesStore.constitutionMod,true)></button>
         <input class="constitution score" type="text" v-model="abilitiesStore.constitution"/>
         <input class="constitutionMod modifier" type="text" :value="abilitiesStore.constitutionMod"/>
       </div>
       <div class="abilityMod">
-        <button class="rollInt abilityBtn" @click="roll(abilitiesStore.intelligenceMod)"></button>
+        <button class="rollInt abilityBtn" @click="roll(abilitiesStore.intelligenceMod)" @click.right.prevent=roll(abilitiesStore.intelligenceMod,true)></button>
         <input class="intelligence score" type="text" v-model="abilitiesStore.intelligence"/>
         <input class="intelligenceMod modifier" type="text" :value="abilitiesStore.intelligenceMod"/>
       </div>
       <div class="abilityMod">
-        <button class="rollWis abilityBtn" @click="roll(abilitiesStore.wisdomMod)"></button>
+        <button class="rollWis abilityBtn" @click="roll(abilitiesStore.wisdomMod)" @click.right.prevent=roll(abilitiesStore.wisdomMod,true)></button>
         <input class="wisdom score" type="text" v-model="abilitiesStore.wisdom"/>
         <input class="wisdomMod modifier" type="text" :value="abilitiesStore.wisdomMod"/>
       </div>
       <div class="abilityMod">
-        <button class="rollCha abilityBtn" @click="roll(abilitiesStore.charismaMod)"></button>
+        <button class="rollCha abilityBtn" @click="roll(abilitiesStore.charismaMod)" @click.right.prevent=roll(abilitiesStore.charismaMod,true)></button>
         <input class="charisma score" type="text" v-model="abilitiesStore.charisma"/>
         <input class="charismaMod modifier" type="text" :value="abilitiesStore.charismaMod"/>
       </div>
@@ -35,17 +35,18 @@
 </template>
 
 <script lang="ts">
-import { rollDice } from '@/util/roll';
-import { defineComponent } from 'vue'
+import { defineComponent } from 'vue';
 import { useAbilitiesStore } from '../stores/abilitiesStore.ts';
+import { useRollStore } from '@/stores/rollStore.ts';
 
 export default defineComponent({
   name: 'AbilityModifiers',
   setup() {
     const abilitiesStore = useAbilitiesStore();
-    const roll = (mod: number) => {
+    const rollStore = useRollStore();
+    const roll = (mod: number,advantageOrDisadvantage:boolean=false) => {
       if(!isNaN(mod)){
-        console.log(rollDice(20,mod));
+        rollStore.rollDice(20,mod,1,advantageOrDisadvantage);
       }
     }
     return { abilitiesStore, roll };
@@ -58,7 +59,7 @@ export default defineComponent({
   position: absolute;
   top: 13.6em;
   width: 4.3em;
-  left: 12em;
+  left: 3.5em;
   height: 40em;
   /* border: 1px solid black; */
 

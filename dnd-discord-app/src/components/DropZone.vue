@@ -1,7 +1,10 @@
 <template>
-    <div @drop.prevent="onDrop" @dragenter.prevent @dragover.prevent class="dropzone">
+    <div @drop.prevent="onDrop" @dragenter.prevent @dragover.prevent class="dropzone" :class="pdfLoadStore.pdfArrayBuffer?'pdfActive':'pdfInactive'">
       <div v-if="pdfLoadStore.pdfArrayBuffer !== null">
         <PdfDisplay></PdfDisplay>
+      </div>
+      <div v-else class="addPdf">
+        <span class="material-symbols-outlined">add</span>
       </div>
 
     </div>
@@ -28,12 +31,40 @@ export default defineComponent({
 
 <style scoped>
 .dropzone {
-  width: 76em;
   height: 95vh;
-  background-color: rgba(0, 0, 0, 0.5);
-  border: 2px dashed #fff;
   align-self: center;
   margin-left: auto;
   margin-right: auto;
 }
+
+.pdfInactive{
+  background-color: rgba(39, 39, 39, 0.5);
+  outline: 2px dashed #fff;
+  width: 50em;
+}
+
+.pdfActive{
+  background-color: transparent;
+  border: none;
+}
+.addPdf{
+  width: 100%;
+  height: 100%;
+  display: flex;
+}
+.material-symbols-outlined {
+  font-variation-settings:
+  'FILL' 0,
+  'wght' 400,
+  'GRAD' 0,
+  'opsz' 24;
+  font-size: 10em;
+  margin: auto;
+}
+@media(max-width:1660px){
+  .dropzone{
+    width: 100%;
+  }
+}
+
 </style>

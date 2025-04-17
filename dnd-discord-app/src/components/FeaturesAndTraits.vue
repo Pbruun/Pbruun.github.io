@@ -25,9 +25,8 @@ export default defineComponent({
   position: absolute;
   top: 12em;
   width: 17em;
-  left: 47.6em;
+  left: 39em;
   height: 60em;
-  outline: 1px solid black;
 }
 
 .traits:first-child{
@@ -55,6 +54,7 @@ export default defineComponent({
   margin-left: 0.2em;
   width: 19em;
   height: 39.8em;
+  scrollbar-width: none;
 }
 
 </style>

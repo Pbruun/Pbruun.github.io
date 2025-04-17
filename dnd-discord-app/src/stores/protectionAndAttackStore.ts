@@ -1,6 +1,6 @@
-import { ref } from 'vue'
-import { defineStore } from 'pinia'
-import { simpleDiceRoll } from '@/util/roll';
+import { defineStore } from 'pinia';
+import { ref } from 'vue';
+import { useRollStore } from './rollStore';
 
 export const useProtectionAndAttackStore = defineStore('protectionAndAttackStore', () => {
   const armorClass = ref('');
@@ -29,9 +29,10 @@ export const useProtectionAndAttackStore = defineStore('protectionAndAttackStore
   const gold = ref('');
   const platinum = ref('');
   const equipment = ref('');
+  const rollStore = useRollStore();
 
   const rollDeathSave = () => {
-    const result = simpleDiceRoll()
+    const result = rollStore.simpleDiceRoll()
     if(deathSavesFailure.value === 3 || deathSavesSuccess.value === 3){
       deathSavesFailure.value = 0;
       deathSavesSuccess.value = 0;

@@ -26,7 +26,6 @@
 </template>
 
 <script lang="ts">
-import { rollDice } from '@/util/roll';
 import { defineComponent } from 'vue'
 import { useAbilitiesStore } from '../stores/abilitiesStore.ts';
 import AbilityModifiers from './AbilityModifiers.vue';
@@ -41,13 +40,8 @@ export default defineComponent({
   setup() {
     const abilitiesStore = useAbilitiesStore();
     const skillsStore = useSkillsStore();
-    const roll = (value:number) => {
-      if(!isNaN(value)){
-        console.log(rollDice(20,value));
-      }
-    }
 
-  return { abilitiesStore,roll,skillsStore };
+  return { abilitiesStore,skillsStore };
   }
 });
 </script>
@@ -63,13 +57,13 @@ export default defineComponent({
 .abilities {
 
   height: 76em;
-  width: 76em;
+  width: 59em;
+  align-items: center;
 
 }
 .abilities img{
   object-fit: contain;
   vertical-align: bottom;
-  width: 76em;
   height: 100%;
 }
 
@@ -77,7 +71,7 @@ export default defineComponent({
   width: 15em;
   height: 2em;
   position: absolute;
-  left: 10em;
+  left: 3.7em;
   top: 4em;
   font-size:20px;
   /* border: none; */
@@ -86,7 +80,7 @@ export default defineComponent({
 }
 .classAndLevel {
   position: absolute;
-  left: 39em;
+  left: 29.3em;
   top:5em;
   width: 11.5em;
 }
@@ -95,40 +89,40 @@ export default defineComponent({
   position: absolute;
   top: 5em;
   width: 10em;
-  left: 51em;
+  left: 41.5em;
 }
 
 .playerName {
   position: absolute;
   top: 5em;
   width: 10em;
-  left: 61.5em;
+  left: 52em;
 }
 
 .race {
   position: absolute;
   top: 8em;
   width: 11.5em;
-  left: 39em;
+  left: 29.3em;
 }
 .alignment {
   position: absolute;
   top: 8em;
   width: 10em;
-  left: 51em;
+  left: 41.5em;
 }
 
 .experience{
   position: absolute;
   top: 8em;
   width: 10em;
-  left: 61.5em;
+  left: 52em;
 }
 
 .inspiration {
   position: absolute;
   top: 12.2em;
-  left: 17.7em;
+  left: 9.3em;
   height: 2.5em;
   width: 2.5em;
   color:black;
@@ -144,7 +138,7 @@ export default defineComponent({
 .proficiencyBonus{
   position:absolute;
   top:12.2em;
-  left:13.4em;
+  left:7em;
   width: 1.8em;
   font-size: 20px;
   text-align: center;
@@ -158,7 +152,7 @@ export default defineComponent({
   font-size: 20px;
   height: 2em;
   top: 42.2em;
-  left: 8.7em;
+  left: 2.3em;
   background-color: transparent;
   border: none;
   pointer-events: none;
@@ -171,7 +165,7 @@ export default defineComponent({
   font-size: 15px;
   height: 13em;
   top: 59.9em;
-  left: 11.5em;
+  left: 3em;
   background-color: transparent;
   border: none;
   scrollbar-width: none;
@@ -179,5 +173,4 @@ export default defineComponent({
   padding-left: 5px;
   padding-right: 5px;
 }
-
 </style>

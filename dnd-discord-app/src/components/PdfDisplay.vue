@@ -27,6 +27,5 @@ export default defineComponent({
   height: 57.3em;
   overflow-x: hidden;
   scrollbar-width: none;
-  width: 76em;
 }
 </style>

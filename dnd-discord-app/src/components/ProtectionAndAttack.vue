@@ -67,13 +67,14 @@
 
 <script lang="ts">
 import { useProtectionAndAttackStore } from '@/stores/protectionAndAttackStore';
-import { rollDice } from '@/util/roll';
-import { defineComponent } from 'vue'
+import { useRollStore } from '@/stores/rollStore';
+import { defineComponent } from 'vue';
 
 export default defineComponent({
   name: 'ProtectionAndAttack',
   setup () {
     const protectionAndAttackStore = useProtectionAndAttackStore();
+    const rollStore = useRollStore();
     const dsSuccess = (value:number)=>{
       const result = protectionAndAttackStore.deathSavesSuccess + value;
       if(result >=0 && result <=3){
@@ -90,7 +91,7 @@ export default defineComponent({
     const roll = (value:string) => {
       const valueNumber = parseInt(value);
       if(!isNaN(valueNumber)){
-        console.log(rollDice(20,valueNumber));
+        rollStore.rollDice(20,valueNumber);
       }
     }
     return {
@@ -106,7 +107,7 @@ export default defineComponent({
   position: absolute;
   top: 12em;
   width: 17em;
-  left: 29.5em;
+  left: 21em;
   height: 42.5em;
 }
 

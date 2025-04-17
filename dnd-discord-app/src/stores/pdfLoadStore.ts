@@ -1,11 +1,11 @@
-import { ref } from 'vue'
+import { onMounted, ref,watch } from 'vue'
 import { defineStore } from 'pinia'
-import { PDFDocument, type PDFForm } from 'pdf-lib';
+import { PDFDocument, PDFRawStream, type PDFForm } from 'pdf-lib';
 import { useAbilitiesStore } from './abilitiesStore';
 import { useSkillsStore } from './skillsStore';
 import { useProtectionAndAttackStore } from './protectionAndAttackStore';
 import { useFeaturesStore } from './featuresStore';
-
+import axios from 'axios';
 export const usePdfLoadStore = defineStore('pdfLoadStore', () => {
   const pdfArrayBuffer = ref(null as ArrayBuffer | null);
   const pdfItem = ref<PDFDocument|null>(null);
@@ -14,6 +14,9 @@ export const usePdfLoadStore = defineStore('pdfLoadStore', () => {
   const skillsStore = useSkillsStore();
   const protectionAndAttackStore = useProtectionAndAttackStore();
   const featuresStore = useFeaturesStore();
+  const errorMessage = ref('');
+  const discordUrl = ref('');
+  const sendMessagesToDiscord = ref(true);
 
   const loadPdf = async (e:DragEvent)=>{
     if(e.dataTransfer){
@@ -23,14 +26,21 @@ export const usePdfLoadStore = defineStore('pdfLoadStore', () => {
            files[0].arrayBuffer().then((ab)=>{
             pdfArrayBuffer.value = ab;
             PDFDocument.load(pdfArrayBuffer.value).then((pdf)=>{
-              console.log(pdf);
-
               pdfItem.value = pdf;
               pdfForms.value = pdf.getForm();
-              initAbilities(pdf.getForm());
-              initSkills(pdf.getForm());
-              initProtection(pdf.getForm());
-              initFeatures(pdf.getForm());
+              try{
+                initAbilities(pdf.getForm());
+                initSkills(pdf.getForm());
+                initProtection(pdf.getForm());
+                initFeatures(pdf.getForm());
+
+                console.log(pdf.getForm().getFields());
+
+              }catch(err){
+                console.log(err);
+                errorMessage.value = 'Error loading PDF. Unable to read the inputs';
+              }
+
             })
           });
         }catch (error) {
@@ -41,6 +51,7 @@ export const usePdfLoadStore = defineStore('pdfLoadStore', () => {
   }
   const initAbilities = (forms:PDFForm) => {
     if(forms !== null){
+
       abilitiesStore.characterName = forms.getTextField("CharacterName").getText()!;
       abilitiesStore.classAndLevel = forms.getTextField("ClassLevel").getText()!
       abilitiesStore.background = forms.getTextField("Background").getText()!
@@ -133,5 +144,41 @@ export const usePdfLoadStore = defineStore('pdfLoadStore', () => {
       featuresStore.featuresAndTraits = forms.getTextField("Features and Traits").getText()!
     }
   }
-  return {pdfItem,pdfForms,pdfArrayBuffer,loadPdf}
+  const sendDiscordMessage = (message:string) =>{
+    try{
+      axios.post(discordUrl.value, {
+        username: abilitiesStore.characterName?abilitiesStore.characterName: "Character rolled",
+        content: message
+    })
+    }catch(e){
+      try{
+        axios.get(`https:/discord.com/api/webhooks/${import.meta.env.VITE_DISCORD_WEBHOOK_ID}`).then((response)=>{
+          axios.post(response.data.url, {
+            username: abilitiesStore.characterName?abilitiesStore.characterName: "Character rolled",
+            content: message
+        })
+        })
+      }catch(err){
+        errorMessage.value = 'Error sending message to discord';
+      }
+
+    }
+  }
+  const setupDiscord = async () => {
+    const respone = await axios.get(`https:/discord.com/api/webhooks/${import.meta.env.VITE_DISCORD_WEBHOOK_ID}`)
+    discordUrl.value = respone.data.url;
+
+  }
+  watch(errorMessage, (newVal) => {
+    if(newVal.length > 0){
+      setTimeout(()=>{
+        errorMessage.value = '';
+      },3500)
+    }
+
+  })
+  onMounted(() => {
+    setupDiscord();
+  })
+  return {pdfItem,pdfForms,pdfArrayBuffer,loadPdf,errorMessage,discordUrl,sendMessagesToDiscord,sendDiscordMessage}
 });
