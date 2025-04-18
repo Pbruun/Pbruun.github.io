@@ -6,10 +6,9 @@ import { useSkillsStore } from './skillsStore';
 import { useProtectionAndAttackStore } from './protectionAndAttackStore';
 import { useFeaturesStore } from './featuresStore';
 import axios from 'axios';
+import { useFileSystemAccess } from '@vueuse/core';
 export const usePdfLoadStore = defineStore('pdfLoadStore', () => {
   const pdfArrayBuffer = ref(null as ArrayBuffer | null);
-  const pdfItem = ref<PDFDocument|null>(null);
-  const pdfForms = ref<PDFForm|null>(null);
   const abilitiesStore = useAbilitiesStore();
   const skillsStore = useSkillsStore();
   const protectionAndAttackStore = useProtectionAndAttackStore();
@@ -30,15 +29,11 @@ export const usePdfLoadStore = defineStore('pdfLoadStore', () => {
            files[0].arrayBuffer().then((ab)=>{
             pdfArrayBuffer.value = ab;
             PDFDocument.load(pdfArrayBuffer.value).then((pdf)=>{
-              pdfItem.value = pdf;
-              pdfForms.value = pdf.getForm();
               try{
                 initAbilities(pdf.getForm());
                 initSkills(pdf.getForm());
                 initProtection(pdf.getForm());
                 initFeatures(pdf.getForm());
-
-                console.log(pdf.getForm().getFields());
 
               }catch(err){
                 console.log(err);
@@ -102,6 +97,7 @@ export const usePdfLoadStore = defineStore('pdfLoadStore', () => {
       skillsStore.persuasion = forms.getTextField("Persuasion").getText()!
       skillsStore.religion = forms.getTextField("Religion").getText()!
       skillsStore.sleightOfHand = forms.getTextField("SleightofHand").getText()!
+      //Yes it needs a whitespace
       skillsStore.stealth = forms.getTextField("Stealth ").getText()!
       skillsStore.survival = forms.getTextField("Survival").getText()!
       skillsStore.otherProficiencies = forms.getTextField("ProficienciesLang").getText()!
@@ -141,6 +137,7 @@ export const usePdfLoadStore = defineStore('pdfLoadStore', () => {
   }
   const initFeatures = (forms:PDFForm) => {
     if(forms !== null){
+      //Yes it needs a whitespace
       featuresStore.personalityTraits = forms.getTextField("PersonalityTraits ").getText()!
       featuresStore.ideals = forms.getTextField("Ideals").getText()!
       featuresStore.bonds = forms.getTextField("Bonds").getText()!
@@ -173,6 +170,115 @@ export const usePdfLoadStore = defineStore('pdfLoadStore', () => {
     discordUrl.value = respone.data.url;
 
   }
+  const savePDF = async () =>{
+    if(pdfArrayBuffer.value !== null){
+      const pdfDoc = await PDFDocument.load(pdfArrayBuffer.value);
+      saveAbilities(pdfDoc.getForm());
+      saveSkills(pdfDoc.getForm());
+      saveProtection(pdfDoc.getForm());
+      saveFeatures(pdfDoc.getForm());
+      const byte = (await pdfDoc.save()).buffer as ArrayBuffer;
+      const fs = useFileSystemAccess();
+      fs.data.value = byte;
+      fs.save();
+
+    }
+  }
+  const saveAbilities = (forms:PDFForm) => {
+    if(forms !== null){
+       forms.getTextField("CharacterName").setText(abilitiesStore.characterName)
+       forms.getTextField("ClassLevel").setText(abilitiesStore.classAndLevel)
+       forms.getTextField("Background").setText(abilitiesStore.background)
+       forms.getTextField("PlayerName").setText(abilitiesStore.playerName)
+       //Yes it needs a whitespace
+       forms.getTextField("Race ").setText(abilitiesStore.race)
+       forms.getTextField("Alignment").setText(abilitiesStore.alignment)
+       forms.getTextField("XP").setText(abilitiesStore.experience)
+       forms.getTextField("STR").setText(abilitiesStore.strength)
+       forms.getTextField("DEX").setText(abilitiesStore.dexterity)
+       forms.getTextField("CON").setText(abilitiesStore.constitution)
+       forms.getTextField("INT").setText(abilitiesStore.intelligence)
+       forms.getTextField("WIS").setText(abilitiesStore.wisdom)
+       forms.getTextField("CHA").setText(abilitiesStore.charisma)
+       forms.getTextField("ProfBonus").setText(abilitiesStore.proficiencyBonus)
+       forms.getTextField("Inspiration").setText(abilitiesStore.inspiration?abilitiesStore.inspiration.toString():"")
+    }
+  }
+  const saveSkills = (forms:PDFForm) => {
+    if(forms !== null){
+      forms.getTextField("ST Strength").setText(skillsStore.strength)
+      forms.getTextField("ST Dexterity").setText(skillsStore.dexterity)
+      forms.getTextField("ST Constitution").setText(skillsStore.constitution)
+      forms.getTextField("ST Intelligence").setText(skillsStore.intelligence)
+      forms.getTextField("ST Wisdom").setText(skillsStore.wisdom)
+      forms.getTextField("ST Charisma").setText(skillsStore.charisma)
+      forms.getTextField("Acrobatics").setText(skillsStore.acrobatics)
+      forms.getTextField("Animal").setText(skillsStore.animalHandling)
+      forms.getTextField("Arcana").setText(skillsStore.arcana)
+      forms.getTextField("Athletics").setText(skillsStore.athletics)
+      //Yes it needs a whitespace
+      forms.getTextField("Deception ").setText(skillsStore.deception)
+      //Yes it needs a whitespace
+      forms.getTextField("History ").setText(skillsStore.history)
+      forms.getTextField("Insight").setText(skillsStore.insight)
+      forms.getTextField("Intimidation").setText(skillsStore.intimidation)
+      //Yes it needs a whitespace
+      forms.getTextField("Investigation ").setText(skillsStore.investigation)
+      forms.getTextField("Medicine").setText(skillsStore.medicine)
+      forms.getTextField("Nature").setText(skillsStore.nature)
+      //Yes it needs a whitespace
+      forms.getTextField("Perception ").setText(skillsStore.perception)
+      forms.getTextField("Performance").setText(skillsStore.performance)
+      forms.getTextField("Persuasion").setText(skillsStore.persuasion)
+      forms.getTextField("Religion").setText(skillsStore.religion)
+      forms.getTextField("SleightofHand").setText(skillsStore.sleightOfHand)
+      //Yes it needs a whitespace
+      forms.getTextField("Stealth ").setText(skillsStore.stealth)
+      forms.getTextField("Survival").setText(skillsStore.survival)
+    }
+  }
+  const  saveProtection = (forms:PDFForm) => {
+    if(forms !== null){
+      forms.getTextField("AC").setText(protectionAndAttackStore.armorClass)
+      forms.getTextField("Initiative").setText(protectionAndAttackStore.initiative)
+      forms.getTextField("Speed").setText(protectionAndAttackStore.speed)
+      forms.getTextField("HPMax").setText(protectionAndAttackStore.maxHP)
+      forms.getTextField("HPCurrent").setText(protectionAndAttackStore.currentHP)
+      forms.getTextField("HPTemp").setText(protectionAndAttackStore.tempHP)
+      forms.getTextField("HDTotal").setText(protectionAndAttackStore.totalHitDice)
+      forms.getTextField("HD").setText(protectionAndAttackStore.hitDice)
+      forms.getTextField("Wpn Name").setText(protectionAndAttackStore.attack1Name)
+      forms.getTextField("Wpn1 AtkBonus").setText(protectionAndAttackStore.attack1Bonus)
+      forms.getTextField("Wpn1 Damage").setText(protectionAndAttackStore.attack1Damage)
+      forms.getTextField("Wpn Name 2").setText(protectionAndAttackStore.attack2Name)
+      //Yes it needs a whitespace
+      forms.getTextField("Wpn2 AtkBonus ").setText(protectionAndAttackStore.attack2Bonus)
+      //Yes it needs a whitespace
+      forms.getTextField("Wpn2 Damage ").setText(protectionAndAttackStore.attack2Damage)
+      forms.getTextField("Wpn Name 3").setText(protectionAndAttackStore.attack3Name)
+      //Yes it needs a whitespace
+      forms.getTextField("Wpn3 AtkBonus  ").setText(protectionAndAttackStore.attack3Bonus)
+      //Yes it needs a whitespace
+      forms.getTextField("Wpn3 Damage ").setText(protectionAndAttackStore.attack3Damage)
+      forms.getTextField("AttacksSpellcasting").setText(protectionAndAttackStore.attackOther)
+      forms.getTextField("CP").setText(protectionAndAttackStore.copper)
+      forms.getTextField("SP").setText(protectionAndAttackStore.silver)
+      forms.getTextField("EP").setText(protectionAndAttackStore.electrum)
+      forms.getTextField("GP").setText(protectionAndAttackStore.gold)
+      forms.getTextField("PP").setText(protectionAndAttackStore.platinum)
+      forms.getTextField("Equipment").setText(protectionAndAttackStore.equipment)
+    }
+  }
+  const saveFeatures = (forms:PDFForm) => {
+    if(forms !== null){
+      //Yes it needs a whitespace
+      forms.getTextField("PersonalityTraits ").setText(featuresStore.personalityTraits)
+      forms.getTextField("Ideals").setText(featuresStore.ideals)
+      forms.getTextField("Bonds").setText(featuresStore.bonds)
+      forms.getTextField("Flaws").setText(featuresStore.flaws)
+      forms.getTextField("Features and Traits").setText(featuresStore.featuresAndTraits)
+    }
+  }
   watch(errorMessage, (newVal) => {
     if(newVal.length > 0){
       setTimeout(()=>{
@@ -184,5 +290,5 @@ export const usePdfLoadStore = defineStore('pdfLoadStore', () => {
   onMounted(() => {
     setupDiscord();
   })
-  return {pdfItem,pdfForms,pdfArrayBuffer,loadPdf,errorMessage,discordUrl,sendMessagesToDiscord,sendDiscordMessage}
+  return {pdfArrayBuffer,loadPdf,errorMessage,discordUrl,sendMessagesToDiscord,sendDiscordMessage,savePDF}
 });

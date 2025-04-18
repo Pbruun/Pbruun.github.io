@@ -11,7 +11,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent, onMounted, onUnmounted } from 'vue'
 import PdfDisplay from './PdfDisplay.vue';
 import { usePdfLoadStore } from '@/stores/pdfLoadStore';
 export default defineComponent({
@@ -23,6 +23,18 @@ export default defineComponent({
         await pdfLoadStore.loadPdf(e);
 
       };
+      const savePDF = (event:KeyboardEvent) =>{
+        if(event.ctrlKey && event.key === 's'){
+          event.preventDefault();
+          pdfLoadStore.savePDF();
+        }
+      }
+      onMounted(()=>{
+        addEventListener('keydown',savePDF);
+      });
+      onUnmounted(()=>{
+        removeEventListener('keydown',savePDF);
+      })
       return { onDrop,pdfLoadStore };
     }});
 
