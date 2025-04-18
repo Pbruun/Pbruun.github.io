@@ -42,18 +42,24 @@
     <div class="fourthRow">
       <div class="attackContainer">
         <input class="attackName" type="text" v-model="protectionAndAttackStore.attack1Name"/>
+        <button class="material-symbols-outlined attackBtn" @click="rollAttack(protectionAndAttackStore.attack1Bonus)" @click.right.prevent="rollAttack(protectionAndAttackStore.attack1Bonus,true)">swords</button>
         <input class="attackBonus" type="text" v-model="protectionAndAttackStore.attack1Bonus"/>
-        <input class="attackDamage" type="text" v-model="protectionAndAttackStore.attack1Damage"/>
+        <input class="attackDamage" type="text" v-model="protectionAndAttackStore.attack1Damage" title="<number of dice>d<dice type>+<modifier>"/>
+        <button class="material-symbols-outlined attackBtn" @click="rollDamage(protectionAndAttackStore.attack1Damage)">explosion</button>
       </div>
       <div class="attackContainer">
         <input class="attackName" type="text" v-model="protectionAndAttackStore.attack2Name"/>
+        <button class="material-symbols-outlined attackBtn" @click="rollAttack(protectionAndAttackStore.attack2Bonus)" @click.right.prevent="rollAttack(protectionAndAttackStore.attack2Bonus,true)">swords</button>
         <input class="attackBonus" type="text" v-model="protectionAndAttackStore.attack2Bonus"/>
-        <input class="attackDamage" type="text" v-model="protectionAndAttackStore.attack2Damage"/>
+        <input class="attackDamage" type="text" v-model="protectionAndAttackStore.attack2Damage" title="<number of dice>d<dice type>+<modifier>"/>
+        <button class="material-symbols-outlined attackBtn" @click="rollDamage(protectionAndAttackStore.attack2Damage)">explosion</button>
       </div>
       <div class="attackContainer">
         <input class="attackName" type="text" v-model="protectionAndAttackStore.attack3Name"/>
+        <button class="material-symbols-outlined attackBtn" @click="rollAttack(protectionAndAttackStore.attack3Bonus)" @click.right.prevent="rollAttack(protectionAndAttackStore.attack3Bonus,true)">swords</button>
         <input class="attackBonus" type="text" v-model="protectionAndAttackStore.attack3Bonus"/>
-        <input class="attackDamage" type="text" v-model="protectionAndAttackStore.attack3Damage"/>
+        <input class="attackDamage" type="text" v-model="protectionAndAttackStore.attack3Damage" title="<number of dice>d<dice type>+<modifier>"/>
+        <button class="material-symbols-outlined attackBtn" @click="rollDamage(protectionAndAttackStore.attack3Damage)">explosion</button>
       </div>
       <textarea class="attackOther" type="text" v-model="protectionAndAttackStore.attackOther"></textarea>
     </div>
@@ -122,10 +128,26 @@ export default defineComponent({
         }
     }
   }
-    return {
-      protectionAndAttackStore,roll,dsSuccess,dsFailure,spentHitDice,rollHitDice
-
+  const rollAttack = (atkBonus:string,advantageOrDisadvantage:boolean=false) =>{
+    let atkBonusNumber:number = 0;
+    if(atkBonus.includes("+")){
+      atkBonusNumber = parseInt(atkBonus.split("+")[1]);
+    }else{
+      atkBonusNumber = parseInt(atkBonus);
     }
+    if(!isNaN(atkBonusNumber)){
+      rollStore.rollDice(20,atkBonusNumber,1,advantageOrDisadvantage);
+    }
+  }
+  const rollDamage = (damage:string) => {
+    const damageSplit = damage.split("d");
+    const diceTypeAndModifier = damageSplit[1].split("+");
+    rollStore.rollDice(parseInt(diceTypeAndModifier[0]),parseInt(diceTypeAndModifier[1]),parseInt(damageSplit[0]))
+  }
+  return {
+    protectionAndAttackStore,roll,dsSuccess,dsFailure,spentHitDice,rollHitDice,rollAttack,rollDamage
+
+  }
   }
 })
 </script>
@@ -326,7 +348,7 @@ export default defineComponent({
   width: 3em;
 }
 .attackContainer .attackName,.attackDamage{
-  width: 6.8em;
+  width: 4.5em;
 }
 
 .attackOther {
@@ -376,5 +398,18 @@ flex-direction: column;
   padding-left: 5px;
   padding-right: 5px;
   scrollbar-width: none;
+}
+.material-symbols-outlined {
+}
+.attackBtn{
+  align-self: center;
+  cursor: pointer;
+  border: none;
+  border-radius: 10px;
+  font-size: 20px;
+}
+.attackBtn:hover{
+  background-color: rgba(0, 0, 0, 0.5);
+  transition: all 0.2s ease-in-out;
 }
 </style>

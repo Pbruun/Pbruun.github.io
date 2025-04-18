@@ -65,14 +65,8 @@ export default defineComponent({
   display: flex;
 }
 .material-symbols-outlined {
-  font-variation-settings:
-  'FILL' 0,
-  'wght' 400,
-  'GRAD' 0,
-  'opsz' 24;
   font-size: 10em;
   margin: auto;
-  font-family: 'Material Symbols Outlined'!important;
 }
 @media(max-width:1660px){
   .dropzone{
