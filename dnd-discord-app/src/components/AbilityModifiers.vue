@@ -66,7 +66,7 @@ export default defineComponent({
 }
 
 .abilityMod{
-  margin-bottom: 1.2em;
+  margin-bottom: 1.1rem;
 }
 
 .abilityMod .score{
