@@ -5,7 +5,7 @@ import { usePdfLoadStore } from './pdfLoadStore';
 export const useRollStore = defineStore('rollStore', () => {
 const listOfRolls = ref<string[]>([]);
 const pdfLoadStore = usePdfLoadStore();
-const rollDice = (diceType:number=20,modifier:number=0,numberOfDice:number=1, advantageOrDisadvantage:boolean=false)=>{
+const rollDice = (diceType:number=20,modifier:number=0,numberOfDice:number=1, advantageOrDisadvantage:boolean=false,messageType:string='Custom Roll')=>{
   let diceRolled = 0;
   let diceRolledAdvantage = 0;
   let message = '';
@@ -22,7 +22,7 @@ const rollDice = (diceType:number=20,modifier:number=0,numberOfDice:number=1, ad
     listOfRolls.value.shift();
   }
   if(pdfLoadStore.sendMessagesToDiscord){
-    pdfLoadStore.sendDiscordMessage(message);
+    pdfLoadStore.sendDiscordMessage(message,messageType);
   }
 
   listOfRolls.value.push(message);

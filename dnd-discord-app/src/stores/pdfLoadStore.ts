@@ -1,18 +1,20 @@
 import { onMounted, ref,watch } from 'vue'
 import { defineStore } from 'pinia'
-import { PDFDocument, PDFRawStream, type PDFForm } from 'pdf-lib';
+import { PDFDocument, PDFRawStream, type PDFForm, PDFName, PDFImage, PDFObject, PDFRef, PDFContext, PDFArray, PDFFont } from 'pdf-lib';
 import { useAbilitiesStore } from './abilitiesStore';
 import { useSkillsStore } from './skillsStore';
 import { useProtectionAndAttackStore } from './protectionAndAttackStore';
 import { useFeaturesStore } from './featuresStore';
 import axios from 'axios';
 import { useFileSystemAccess } from '@vueuse/core';
+import { useBackgroundStore } from './backgroundStore';
 export const usePdfLoadStore = defineStore('pdfLoadStore', () => {
   const pdfArrayBuffer = ref(null as ArrayBuffer | null);
   const abilitiesStore = useAbilitiesStore();
   const skillsStore = useSkillsStore();
   const protectionAndAttackStore = useProtectionAndAttackStore();
   const featuresStore = useFeaturesStore();
+  const backgroundStore = useBackgroundStore();
   const errorMessage = ref('');
   const discordUrl = ref('');
   const sendMessagesToDiscord = ref(true);
@@ -20,31 +22,34 @@ export const usePdfLoadStore = defineStore('pdfLoadStore', () => {
     baseURL: 'https://discord.com/api/webhooks',
     timeout: 3000
   });
+  const test = ref({} as Blob);
 
   const loadPdf = async (e:DragEvent)=>{
     if(e.dataTransfer){
       const files = [...e.dataTransfer.files];
-      if(files[0].type === "application/pdf"){
-        try {
-           files[0].arrayBuffer().then((ab)=>{
-            pdfArrayBuffer.value = ab;
-            PDFDocument.load(pdfArrayBuffer.value).then((pdf)=>{
-              try{
-                initAbilities(pdf.getForm());
-                initSkills(pdf.getForm());
-                initProtection(pdf.getForm());
-                initFeatures(pdf.getForm());
+      try {
+        if(files[0].type === "application/pdf"){
 
-              }catch(err){
-                console.log(err);
-                errorMessage.value = 'Error loading PDF. Unable to read the inputs';
-              }
+            files[0].arrayBuffer().then((ab)=>{
+              pdfArrayBuffer.value = ab;
+              PDFDocument.load(pdfArrayBuffer.value).then((pdf)=>{
+                try{
+                  initAbilities(pdf.getForm());
+                  initSkills(pdf.getForm());
+                  initProtection(pdf.getForm());
+                  initFeatures(pdf.getForm());
+                  initBackground(pdf.getForm());
+                  extractImage(pdf);
+                }catch(err){
+                  console.log(err);
+                  errorMessage.value = 'Error loading PDF. Unable to read the inputs';
+                }
 
-            })
-          });
-        }catch (error) {
-          console.log(error);
-        }
+              })
+            });
+          }
+      }catch (error) {
+        console.log(error);
       }
     }
   }
@@ -145,18 +150,40 @@ export const usePdfLoadStore = defineStore('pdfLoadStore', () => {
       featuresStore.featuresAndTraits = forms.getTextField("Features and Traits").getText()!
     }
   }
-  const sendDiscordMessage = (message:string) =>{
+  const initBackground = (forms:PDFForm) => {
+    if(forms !== null){
+      backgroundStore.additionalInfo = forms.getTextField("Feat+Traits").getText()!
+      backgroundStore.age = forms.getTextField("Age").getText()!
+      backgroundStore.allies = forms.getTextField("Allies").getText()!
+      backgroundStore.backstory = forms.getTextField("Backstory").getText()!
+      backgroundStore.eyes = forms.getTextField("Eyes").getText()!
+      backgroundStore.hair = forms.getTextField("Hair").getText()!
+      backgroundStore.height = forms.getTextField("Height").getText()!
+      backgroundStore.skin = forms.getTextField("Skin").getText()!
+      backgroundStore.weight = forms.getTextField("Weight").getText()!
+      backgroundStore.symbolName = forms.getTextField("FactionName").getText()!
+      backgroundStore.treasure = forms.getTextField("Treasure").getText()!
+
+    }
+  }
+  const sendDiscordMessage = (message:string, messageType:string = 'Custom Roll') =>{
     try{
       axios.post(discordUrl.value, {
         username: abilitiesStore.characterName?abilitiesStore.characterName: "Character rolled",
-        content: message
+        embeds:[{
+          title: messageType,
+          description:message
+        }]
     })
     }catch(e){
       try{
         instance.get(`/${import.meta.env.VITE_DISCORD_WEBHOOK_ID}`).then((response)=>{
           instance.post(response.data.url, {
             username: abilitiesStore.characterName?abilitiesStore.characterName: "Character rolled",
-            content: message
+            embeds:[{
+              title: messageType,
+              description:message
+            }]
         })
         })
       }catch(err){
@@ -170,6 +197,27 @@ export const usePdfLoadStore = defineStore('pdfLoadStore', () => {
     discordUrl.value = respone.data.url;
 
   }
+  const extractImage = (doc:PDFDocument) => {
+    if(doc !== null){
+      doc.context
+        .enumerateIndirectObjects()
+        .forEach(async ([pdfRef, pdfObject], ref) => {
+          if (!(pdfObject instanceof PDFRawStream)) {
+            return;
+          }
+          const { dict } = pdfObject;
+          const subtype = dict.get(PDFName.of("Subtype"));
+          if (subtype == PDFName.of("Image")) {
+            backgroundStore.appearance = URL.createObjectURL(new Blob([pdfObject.contents.buffer]))
+          }
+      });
+
+    }else{
+      return;
+    }
+
+  }
+
   const savePDF = async () =>{
     if(pdfArrayBuffer.value !== null){
       const pdfDoc = await PDFDocument.load(pdfArrayBuffer.value);
@@ -177,10 +225,13 @@ export const usePdfLoadStore = defineStore('pdfLoadStore', () => {
       saveSkills(pdfDoc.getForm());
       saveProtection(pdfDoc.getForm());
       saveFeatures(pdfDoc.getForm());
+      saveBackground(pdfDoc.getForm());
       const byte = (await pdfDoc.save()).buffer as ArrayBuffer;
       const fs = useFileSystemAccess();
       fs.data.value = byte;
-      fs.save();
+      fs.saveAs({
+        suggestedName: `${abilitiesStore.characterName}.pdf`
+      });
 
     }
   }
@@ -287,6 +338,26 @@ export const usePdfLoadStore = defineStore('pdfLoadStore', () => {
     }
 
   })
+
+  const saveBackground = (forms:PDFForm) => {
+    if(forms !== null){
+      forms.getTextField("Feat+Traits").setText(backgroundStore.additionalInfo);
+      forms.getTextField("Feat+Traits").acroField.setDefaultAppearance("0 0 0 rg /Helvetica 10 Tf")
+      forms.getTextField("Age").setText(backgroundStore.age)
+      forms.getTextField("Allies").setText(backgroundStore.allies)
+      forms.getTextField("Allies").acroField.setDefaultAppearance("0 0 0 rg /Helvetica 10 Tf")
+      forms.getTextField("Backstory").setText(backgroundStore.backstory)
+      forms.getTextField("Backstory").acroField.setDefaultAppearance("0 0 0 rg /Helvetica 10 Tf")
+      forms.getTextField("Eyes").setText(backgroundStore.eyes)
+      forms.getTextField("Hair").setText(backgroundStore.hair)
+      forms.getTextField("Height").setText(backgroundStore.height)
+      forms.getTextField("Skin").setText(backgroundStore.skin)
+      forms.getTextField("Weight").setText(backgroundStore.weight)
+      forms.getTextField("FactionName").setText(backgroundStore.symbolName)
+      forms.getTextField("Treasure").setText(backgroundStore.treasure)
+      forms.getTextField("Treasure").acroField.setDefaultAppearance("0 0 0 rg /Helvetica 10 Tf")
+    }
+  }
   onMounted(() => {
     setupDiscord();
   })

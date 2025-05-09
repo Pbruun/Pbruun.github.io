@@ -3,22 +3,15 @@
 
 
     <div class="abilities">
-      <!-- <img src="../assets/abilities.jpg"/> -->
-      <input class="name" type="text" :value="abilitiesStore.characterName"/>
-      <input class="classAndLevel" type="text" :value="abilitiesStore.classAndLevel"/>
-      <input class="background" type="text" :value="abilitiesStore.background"/>
-      <input class="playerName" type="text" :value="abilitiesStore.playerName"/>
-      <input class="race" type="text" :value="abilitiesStore.race"/>
-      <input class="alignment" type="text" :value="abilitiesStore.alignment"/>
-      <input class="experience" type="text" :value="abilitiesStore.experience"/>
+       <CharacterInfoHeader class="characterHeader" :page-number="1"></CharacterInfoHeader>
       <AbilityModifiers></AbilityModifiers>
       <span class="inspiration" @click="abilitiesStore.inspiration = !abilitiesStore.inspiration"  :value="abilitiesStore.inspiration">
         <span v-show="abilitiesStore.inspiration">X</span>
       </span>
-      <input class="proficiencyBonus" type="text" :value="abilitiesStore.proficiencyBonus"/>
+      <input class="proficiencyBonus" type="text" v-model="abilitiesStore.proficiencyBonus"/>
       <SkillModifiers></SkillModifiers>
       <input class="passivePerception" type="text" :value="skillsStore.perceptionPassive"/>
-      <textarea class="otherProficiencies" type="text" :value="skillsStore.otherProficiencies"/>
+      <textarea class="otherProficiencies" type="text" v-model="skillsStore.otherProficiencies"/>
       <ProtectionAndAttack></ProtectionAndAttack>
       <FeaturesAndTraits></FeaturesAndTraits>
     </div>
@@ -33,10 +26,11 @@ import SkillModifiers from './SkillModifiers.vue';
 import { useSkillsStore } from '@/stores/skillsStore.ts';
 import ProtectionAndAttack from './ProtectionAndAttack.vue';
 import FeaturesAndTraits from './FeaturesAndTraits.vue';
+import CharacterInfoHeader from './CharacterInfoHeader.vue';
 
 export default defineComponent({
   name: 'AbilitiesDisplay',
-  components: {AbilityModifiers,SkillModifiers,ProtectionAndAttack,FeaturesAndTraits},
+  components: {AbilityModifiers,SkillModifiers,ProtectionAndAttack,FeaturesAndTraits,CharacterInfoHeader},
   setup() {
     const abilitiesStore = useAbilitiesStore();
     const skillsStore = useSkillsStore();
@@ -65,6 +59,9 @@ export default defineComponent({
   object-fit: contain;
   vertical-align: bottom;
   height: 100%;
+}
+.characterHeader{
+  margin-top: 4.7em !important;
 }
 
 .name {

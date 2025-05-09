@@ -4,7 +4,7 @@
       <input class="armorClass" type="text" v-model="protectionAndAttackStore.armorClass"/>
       <div class="initiativeContainer">
         <input class="initiative" type="text" v-model="protectionAndAttackStore.initiative"/>
-        <button class="rollInitiative btn" @click="roll(protectionAndAttackStore.initiative)" @click.right.prevent="roll(protectionAndAttackStore.initiative,true)"></button>
+        <button class="rollInitiative btn" @click="roll(protectionAndAttackStore.initiative)" @click.right.prevent="roll(protectionAndAttackStore.initiative,true)" value="Initiative"></button>
       </div>
       <input class="speed" type="text" v-model="protectionAndAttackStore.speed"/>
     </div>
@@ -42,24 +42,24 @@
     <div class="fourthRow">
       <div class="attackContainer">
         <input class="attackName" type="text" v-model="protectionAndAttackStore.attack1Name"/>
-        <button class="material-symbols-outlined attackBtn" @click="rollAttack(protectionAndAttackStore.attack1Bonus)" @click.right.prevent="rollAttack(protectionAndAttackStore.attack1Bonus,true)">swords</button>
+        <button class="material-symbols-outlined attackBtn" @click="rollAttack(protectionAndAttackStore.attack1Bonus)" @click.right.prevent="rollAttack(protectionAndAttackStore.attack1Bonus,true)" :value="`${protectionAndAttackStore.attack1Name} Attack`">swords</button>
         <input class="attackBonus" type="text" v-model="protectionAndAttackStore.attack1Bonus"/>
         <input class="attackDamage" type="text" v-model="protectionAndAttackStore.attack1Damage" title="<number of dice>d<dice type>+<modifier>"/>
-        <button class="material-symbols-outlined attackBtn" @click="rollDamage(protectionAndAttackStore.attack1Damage)">explosion</button>
+        <button class="material-symbols-outlined attackBtn" @click="rollDamage(protectionAndAttackStore.attack1Damage)" :value="`${protectionAndAttackStore.attack1Name} Damage`">explosion</button>
       </div>
       <div class="attackContainer">
         <input class="attackName" type="text" v-model="protectionAndAttackStore.attack2Name"/>
-        <button class="material-symbols-outlined attackBtn" @click="rollAttack(protectionAndAttackStore.attack2Bonus)" @click.right.prevent="rollAttack(protectionAndAttackStore.attack2Bonus,true)">swords</button>
+        <button class="material-symbols-outlined attackBtn" @click="rollAttack(protectionAndAttackStore.attack2Bonus)" @click.right.prevent="rollAttack(protectionAndAttackStore.attack2Bonus,true)" :value="`${protectionAndAttackStore.attack2Name} Attack`">swords</button>
         <input class="attackBonus" type="text" v-model="protectionAndAttackStore.attack2Bonus"/>
         <input class="attackDamage" type="text" v-model="protectionAndAttackStore.attack2Damage" title="<number of dice>d<dice type>+<modifier>"/>
-        <button class="material-symbols-outlined attackBtn" @click="rollDamage(protectionAndAttackStore.attack2Damage)">explosion</button>
+        <button class="material-symbols-outlined attackBtn" @click="rollDamage(protectionAndAttackStore.attack2Damage)" :value="`${protectionAndAttackStore.attack2Name} Damage`">explosion</button>
       </div>
       <div class="attackContainer">
         <input class="attackName" type="text" v-model="protectionAndAttackStore.attack3Name"/>
-        <button class="material-symbols-outlined attackBtn" @click="rollAttack(protectionAndAttackStore.attack3Bonus)" @click.right.prevent="rollAttack(protectionAndAttackStore.attack3Bonus,true)">swords</button>
+        <button class="material-symbols-outlined attackBtn" @click="rollAttack(protectionAndAttackStore.attack3Bonus)" @click.right.prevent="rollAttack(protectionAndAttackStore.attack3Bonus,true)" :value="`${protectionAndAttackStore.attack3Name} Attack`">swords</button>
         <input class="attackBonus" type="text" v-model="protectionAndAttackStore.attack3Bonus"/>
         <input class="attackDamage" type="text" v-model="protectionAndAttackStore.attack3Damage" title="<number of dice>d<dice type>+<modifier>"/>
-        <button class="material-symbols-outlined attackBtn" @click="rollDamage(protectionAndAttackStore.attack3Damage)">explosion</button>
+        <button class="material-symbols-outlined attackBtn" @click="rollDamage(protectionAndAttackStore.attack3Damage)" :value="`${protectionAndAttackStore.attack3Name} Attack`">explosion</button>
       </div>
       <textarea class="attackOther" type="text" v-model="protectionAndAttackStore.attackOther"></textarea>
     </div>
@@ -104,9 +104,12 @@ export default defineComponent({
     }
 
     const roll = (value:string,advantageOrDisadvantage:boolean=false) => {
+      const e  = event as PointerEvent;
+      const t = e.target as HTMLButtonElement;
+      const messageType = t ? t.value : 'Custom Roll';
       const valueNumber = parseInt(value);
       if(!isNaN(valueNumber)){
-        rollStore.rollDice(20,valueNumber,1,advantageOrDisadvantage);
+        rollStore.rollDice(20,valueNumber,1,advantageOrDisadvantage,messageType);
       }
     }
     const rollHitDice = () =>{
@@ -129,6 +132,9 @@ export default defineComponent({
     }
   }
   const rollAttack = (atkBonus:string,advantageOrDisadvantage:boolean=false) =>{
+    const e  = event as PointerEvent;
+    const t = e.target as HTMLButtonElement;
+    const messageType = t ? t.value : 'Custom Roll';
     let atkBonusNumber:number = 0;
     if(atkBonus.includes("+")){
       atkBonusNumber = parseInt(atkBonus.split("+")[1]);
@@ -136,13 +142,16 @@ export default defineComponent({
       atkBonusNumber = parseInt(atkBonus);
     }
     if(!isNaN(atkBonusNumber)){
-      rollStore.rollDice(20,atkBonusNumber,1,advantageOrDisadvantage);
+      rollStore.rollDice(20,atkBonusNumber,1,advantageOrDisadvantage,messageType);
     }
   }
   const rollDamage = (damage:string) => {
+    const e  = event as PointerEvent;
+    const t = e.target as HTMLButtonElement;
+    const messageType = t ? t.value : 'Custom Roll';
     const damageSplit = damage.split("d");
     const diceTypeAndModifier = damageSplit[1].split("+");
-    rollStore.rollDice(parseInt(diceTypeAndModifier[0]),parseInt(diceTypeAndModifier[1]),parseInt(damageSplit[0]))
+    rollStore.rollDice(parseInt(diceTypeAndModifier[0]),parseInt(diceTypeAndModifier[1]),parseInt(damageSplit[0]),false,messageType)
   }
   return {
     protectionAndAttackStore,roll,dsSuccess,dsFailure,spentHitDice,rollHitDice,rollAttack,rollDamage
