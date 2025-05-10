@@ -8,6 +8,7 @@ import { useFeaturesStore } from './featuresStore';
 import axios from 'axios';
 import { useFileSystemAccess } from '@vueuse/core';
 import { useBackgroundStore } from './backgroundStore';
+import { useSpellsStore } from './spellsStore';
 export const usePdfLoadStore = defineStore('pdfLoadStore', () => {
   const pdfArrayBuffer = ref(null as ArrayBuffer | null);
   const abilitiesStore = useAbilitiesStore();
@@ -15,6 +16,7 @@ export const usePdfLoadStore = defineStore('pdfLoadStore', () => {
   const protectionAndAttackStore = useProtectionAndAttackStore();
   const featuresStore = useFeaturesStore();
   const backgroundStore = useBackgroundStore();
+  const spellsStore = useSpellsStore();
   const errorMessage = ref('');
   const discordUrl = ref('');
   const sendMessagesToDiscord = ref(true);
@@ -22,7 +24,6 @@ export const usePdfLoadStore = defineStore('pdfLoadStore', () => {
     baseURL: 'https://discord.com/api/webhooks',
     timeout: 3000
   });
-  const test = ref({} as Blob);
 
   const loadPdf = async (e:DragEvent)=>{
     if(e.dataTransfer){
@@ -40,6 +41,7 @@ export const usePdfLoadStore = defineStore('pdfLoadStore', () => {
                   initFeatures(pdf.getForm());
                   initBackground(pdf.getForm());
                   extractImage(pdf);
+                  spellsStore.importSpells(pdf.getForm());
                 }catch(err){
                   console.log(err);
                   errorMessage.value = 'Error loading PDF. Unable to read the inputs';
@@ -226,6 +228,7 @@ export const usePdfLoadStore = defineStore('pdfLoadStore', () => {
       saveProtection(pdfDoc.getForm());
       saveFeatures(pdfDoc.getForm());
       saveBackground(pdfDoc.getForm());
+      spellsStore.saveSpells(pdfDoc.getForm());
       const byte = (await pdfDoc.save()).buffer as ArrayBuffer;
       const fs = useFileSystemAccess();
       fs.data.value = byte;

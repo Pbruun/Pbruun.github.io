@@ -2,6 +2,7 @@
 <div class="container">
   <AbilitiesDisplay></AbilitiesDisplay>
   <BackgroundDisplay></BackgroundDisplay>
+  <SpellsDisplay></SpellsDisplay>
 </div>
 
 </template>
@@ -10,10 +11,11 @@
 import { defineComponent } from 'vue';
 import AbilitiesDisplay from './AbilitiesDisplay.vue';
 import BackgroundDisplay from './BackgroundDisplay.vue';
+import SpellsDisplay from './SpellsDisplay.vue';
 
 export default defineComponent({
   name: 'PdfDisplay',
-  components: { AbilitiesDisplay,BackgroundDisplay },
+  components: { AbilitiesDisplay, BackgroundDisplay, SpellsDisplay},
 
   setup() {
 
