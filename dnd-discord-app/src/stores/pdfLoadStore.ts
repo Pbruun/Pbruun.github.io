@@ -1,6 +1,6 @@
 import { onMounted, ref,watch } from 'vue'
 import { defineStore } from 'pinia'
-import { PDFDocument, PDFRawStream, type PDFForm, PDFName, PDFImage, PDFObject, PDFRef, PDFContext, PDFArray, PDFFont } from 'pdf-lib';
+import { PDFDocument, PDFRawStream, type PDFForm, PDFName } from 'pdf-lib';
 import { useAbilitiesStore } from './abilitiesStore';
 import { useSkillsStore } from './skillsStore';
 import { useProtectionAndAttackStore } from './protectionAndAttackStore';
@@ -9,6 +9,7 @@ import axios from 'axios';
 import { useFileSystemAccess } from '@vueuse/core';
 import { useBackgroundStore } from './backgroundStore';
 import { useSpellsStore } from './spellsStore';
+import { useRoute } from 'vue-router';
 export const usePdfLoadStore = defineStore('pdfLoadStore', () => {
   const pdfArrayBuffer = ref(null as ArrayBuffer | null);
   const abilitiesStore = useAbilitiesStore();
@@ -24,7 +25,9 @@ export const usePdfLoadStore = defineStore('pdfLoadStore', () => {
     baseURL: 'https://discord.com/api/webhooks',
     timeout: 3000
   });
-
+  const discordId = ref('');
+  const discordToken = ref('');
+  const route = useRoute();
   const loadPdf = async (e:DragEvent)=>{
     if(e.dataTransfer){
       const files = [...e.dataTransfer.files];
@@ -195,7 +198,13 @@ export const usePdfLoadStore = defineStore('pdfLoadStore', () => {
     }
   }
   const setupDiscord = async () => {
-    const respone = await instance.get(`/${import.meta.env.VITE_DISCORD_WEBHOOK_ID}`)
+    if(!route.query.id || !route.query.token){
+      sendMessagesToDiscord.value = false;
+      return;
+    }
+    discordId.value = route.query.id.toString();
+    discordToken.value = route.query.token.toString();
+    const respone = await instance.get(`/${ discordId.value}/${discordToken.value}`);
     discordUrl.value = respone.data.url;
 
   }
@@ -364,5 +373,5 @@ export const usePdfLoadStore = defineStore('pdfLoadStore', () => {
   onMounted(() => {
     setupDiscord();
   })
-  return {pdfArrayBuffer,loadPdf,errorMessage,discordUrl,sendMessagesToDiscord,sendDiscordMessage,savePDF}
+  return {pdfArrayBuffer,loadPdf,errorMessage,discordUrl,sendMessagesToDiscord,sendDiscordMessage,savePDF,discordId,discordToken}
 });
