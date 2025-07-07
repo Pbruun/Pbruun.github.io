@@ -28,7 +28,7 @@ export default defineComponent({
 .container {
   position: relative;
   overflow-y: auto;
-  height: 57.3em;
+  height: 95vh;
   overflow-x: hidden;
   scrollbar-width: none;
 }
