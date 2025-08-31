@@ -42,7 +42,7 @@
     <div class="fourthRow">
       <div class="attackContainer">
         <input class="attackName" type="text" v-model="protectionAndAttackStore.attack1Name"/>
-        <button class="material-symbols-outlined attackBtn" @click="rollAttack(protectionAndAttackStore.attack1Bonus)" @click.right.prevent="rollAttack(protectionAndAttackStore.attack1Bonus,true)" :value="`${protectionAndAttackStore.attack1Name} Attack`">swords</button>
+        <button alt="" class="material-symbols-outlined attackBtn" @click="rollAttack(protectionAndAttackStore.attack1Bonus)" @click.right.prevent="rollAttack(protectionAndAttackStore.attack1Bonus,true)" :value="`${protectionAndAttackStore.attack1Name} Attack`">swords</button>
         <input class="attackBonus" type="text" v-model="protectionAndAttackStore.attack1Bonus"/>
         <input class="attackDamage" type="text" v-model="protectionAndAttackStore.attack1Damage" title="<number of dice>d<dice type>+<modifier>"/>
         <button class="material-symbols-outlined attackBtn" @click="rollDamage(protectionAndAttackStore.attack1Damage)" :value="`${protectionAndAttackStore.attack1Name} Damage`">explosion</button>
