@@ -64,6 +64,14 @@ export const useAbilitiesStore = defineStore('abilitiesStore', () => {
     }
   })
 
+    watch(charisma, (newVal) => {
+    let valueNumber = parseInt(newVal);
+    if(!isNaN(valueNumber)){
+      valueNumber = valueNumber % 2 === 0 ? valueNumber : valueNumber-1;
+      charismaMod.value = Math.floor((valueNumber - 10) / 2);
+    }
+  })
+
 
 
   return {characterName, classAndLevel, background,
